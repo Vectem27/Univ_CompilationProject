@@ -1,9 +1,13 @@
 @echo off
 
-flex lexer.l
-bison -d parser.y
+bison -d --language=c++ parser.y
+flex++ lexer.l
+ren lex.yy.cc lexer.cpp
 
-mkdir bin
-clang -std=c99 -o bin/lexer.exe lex.yy.c parser.tab.c
+if not exist bin (
+    mkdir bin
+)
 
-REM -I"C:\Program Files (x86)\GnuWin32\include"
+clang -std=c++20 -isystem -I"./inc" -o bin/compiler.exe parser.tab.cc lexer.cpp main.cpp
+
+REM

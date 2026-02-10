@@ -1,23 +1,15 @@
-%{
-#include <stdio.h>
-#include <stdlib.h>
-%}
-
-%token PRINT NUMBER
+%token NUMBER IDENT PRINT LET
+%start program
 
 %%
 
-stmt: PRINT NUMBER ';' { printf("Print number: %d\n", $2); }
+program:
+      program stmt
+    | stmt
     ;
 
+stmt:
+      PRINT NUMBER ';' { cout << yylval_num << endl; }
+    | LET IDENT '=' NUMBER ';' { cout << "Variable " << yylval_str << " = " << yylval_num << endl; }
+    ;
 %%
-
-int main() {
-    yyparse();
-    return 0;
-}
-
-int yyerror(char *s) {
-    fprintf(stderr, "Erreur syntaxe: %s\n", s);
-    return 0;
-}
