@@ -1,0 +1,7 @@
+**/build/
+**/Build/
+
+**/bin/
+**/Bin/
+
+lex.yy.c
