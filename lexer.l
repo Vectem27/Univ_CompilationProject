@@ -1,12 +1,9 @@
-%option noyywrap
-%option c++
-
 %{
-#include "parser.tab.hh"
-#include <cstdlib>
-#include <string>
-#include <iostream>
-using namespace std;
+#include "parser.tab.h"   // header généré par Bison
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
+
 %}
 
 DIGIT   [0-9]
@@ -14,16 +11,18 @@ ID      [a-zA-Z_][a-zA-Z0-9_]*
 
 %%
 
-"print"     { return Parser::token::PRINT; }
-"let"       { return Parser::token::LET; }
+"print"     { return PRINT; }
+"let"       { return LET; }
 
-{ID}        { yylval->str = new std::string(yytext); return Parser::token::IDENT; }
-{DIGIT}+    { yylval->num = atoi(yytext); return Parser::token::NUMBER; }
+{ID}        { yylval.str = strdup(yytext); return IDENT; }
+{DIGIT}+    { yylval.num = atoi(yytext); return NUMBER; }
 
 "="         { return '='; }
 ";"         { return ';'; }
 "+"         { return '+'; }
 
 [ \t\n]+    ;  // ignore whitespace
-.           { cerr << "Caractère inconnu: " << yytext << endl; }
+.           { fprintf(stderr, "Caractère inconnu: %s\n", yytext); }
 %%
+
+int yywrap(void) { return 1; }

@@ -1,8 +1,10 @@
-#include <FlexLexer.h>
-#include "parser.tab.hh"
+#include <iostream>
+
+extern "C" {
+    int yyparse();
+}
 
 int main() {
-    yy::parser parser;
-    parser.parse();
-    return 0;
+    std::cout << "Début du parsing\n";
+    return yyparse();
 }
