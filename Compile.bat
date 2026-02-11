@@ -21,11 +21,10 @@ if not exist obj (
 )
 cd ../..
 
-bison -d -o build/lexer_parser/parser.tab.c parser.y 
-flex -obuild/lexer_parser/lex.yy.c lexer.l
+bison -d -v -o build/lexer_parser/parser.tab.cc parser.y
+flex -obuild/lexer_parser/lex.yy.cc lexer.l
 
+clang++ -std=c++20 -Iinc -w -c build/lexer_parser/parser.tab.cc -o build/lexer_parser/obj/parser.tab.o
+clang++ -std=c++20 -Iinc -w -c build/lexer_parser/lex.yy.cc -o build/lexer_parser/obj/lex.yy.o
 
-clang -w -c build/lexer_parser/parser.tab.c -o build/lexer_parser/obj/parser.tab.o
-clang -w -c build/lexer_parser/lex.yy.c -o build/lexer_parser/obj/lex.yy.o
-
-clang++ -std=c++17 main.cpp build/lexer_parser/obj/parser.tab.o build/lexer_parser/obj/lex.yy.o -o bin/compiler.exe
+clang++ -std=c++20 main.cpp  -Ibuild/lexer_parser -Iinc build/lexer_parser/obj/parser.tab.o build/lexer_parser/obj/lex.yy.o -o bin/compiler.exe

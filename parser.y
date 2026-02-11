@@ -1,44 +1,46 @@
+%code requires {
+    #include "ast.h"
+}
+
+
 %{
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <iostream>
+#include <memory>
+#include <string>
+#include <vector>
+#include "ast.h"
 
-void yyerror(const char *s);
-int yylex();
+std::vector<std::unique_ptr<Stmt>> ast;
+void yyerror(const char* s);
+int yylex(void);
 
-typedef struct {
-    int num;
-    char* str;
-} YYSTYPE;
-
-#define YYSTYPE YYSTYPE
+//void yyerror(const char* s) { std::cerr << "Erreur: " << s << "\n"; }
 %}
 
 %union {
     int num;
-    char* str;
+    std::string* str;
+    Stmt* stmt;
 }
 
 %token <num> NUMBER
 %token <str> IDENT
 %token PRINT LET
 
+%type <stmt> stmt
+
 %start program
 
 %%
 
 program:
-      program stmt
-    | stmt
+      program stmt   { ast.emplace_back($2); }
+    | stmt           { ast.emplace_back($1); }
     ;
 
 stmt:
-      PRINT NUMBER ';'        { printf("%d\n", $2); }
-    | LET IDENT '=' NUMBER ';' { printf("Variable %s = %d\n", $2, $4); free($2); }
+      PRINT NUMBER ';'        { $$ = new PrintStmt($2); }
+    | LET IDENT '=' NUMBER ';' { $$ = new LetStmt(*$2, $4); delete $2; }
     ;
 
 %%
-
-void yyerror(const char *s) {
-    fprintf(stderr, "Erreur: %s\n", s);
-}
