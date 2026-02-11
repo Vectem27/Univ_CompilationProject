@@ -1,5 +1,5 @@
 %code requires {
-    #include "ast.h"
+    #include "Ast.h"
 }
 
 
@@ -8,7 +8,7 @@
 #include <memory>
 #include <string>
 #include <vector>
-#include "ast.h"
+#include "Ast.h"
 
 std::vector<std::unique_ptr<Stmt>> ast;
 void yyerror(const char* s);

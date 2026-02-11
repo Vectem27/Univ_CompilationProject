@@ -4,7 +4,7 @@
 
 #include "FlexLexer.h"
 #include "parser.tab.hh"   // header généré par Bison
-#include "ast.h"
+#include "Ast.h"
 
 // AST global défini dans parser.y
 extern std::vector<std::unique_ptr<Stmt>> ast;
