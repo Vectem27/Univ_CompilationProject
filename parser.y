@@ -11,21 +11,30 @@
     #include <vector>
     #include <iostream>
 
-    
+    class LexerWrapper;
 }
 
+%parse-param { LexerWrapper& lexer }
+%lex-param { LexerWrapper& lexer }
+
 %code {
+    #include "LexerWrapper.h"
+
     extern std::vector<std::shared_ptr<AstNodeBase>> ast;
 
-    yy::parser::symbol_type yylex();
+    yy::parser::symbol_type yylex(LexerWrapper& lexer)
+    {
+        return lexer.yylex();
+    }
 
     void yy::parser::error(const std::string& msg)
     {
         std::cerr << "Parse error: " << msg << std::endl;
     }
+
 }
 
-%define api.token.prefix {TOK_}
+%define api.token.prefix {PARSER_TOK_}
 
 %token <int> INTEGER
 %token
@@ -52,3 +61,4 @@ expr:
           ast.push_back(std::static_pointer_cast<ExprNode>($$));
       }
     ;
+

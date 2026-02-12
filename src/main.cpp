@@ -1,35 +1,12 @@
-#include <cstdlib>
-#include <iostream>
-#include <memory>
-#include <vector>
-
-//#include "FlexLexer.h"   // Flex given class
-#include "parser.tab.hh" // Bison generated header
+#include "parser.tab.hh"
 #include "Ast.h"
+#include "LexerWrapper.h"
+
+#include <fstream>
+
+
 
 std::vector<std::shared_ptr<AstNodeBase>> ast;
-//static yyFlexLexer lexer;
-//int yylex() { return lexer.yylex(); }
-
-yy::parser::symbol_type yylex()
-{
-    static int count = 0;
-    switch (int stage = count++)
-    {
-    case 0:
-        return yy::parser::make_INTEGER (5);
-    case 1:
-        return yy::parser::make_PLUS ();
-    case 2:
-        return yy::parser::make_INTEGER (3);
-    default:
-        return yy::parser::make_YYEOF ();
-    }
-}
-
-void yyerror(const char* s) {
-    std::cerr << "Erreur: " << s << std::endl;
-}
 
 class TestValidator : public INodeValidator
 {
@@ -47,10 +24,38 @@ public:
     }
 };
 
-int main() {
+int main(int argc, char* argv[]) 
+{
+    if (argc != 2)
+    {
+        std::cerr << "1 arguments is required";
+        return EXIT_FAILURE;
+    }
+
+    std::ifstream inputFile(argv[1]);
+    if (!inputFile) {
+        std::cerr << "Impossible d'ouvrir le fichier " << argv[1] << std::endl;
+        return EXIT_FAILURE;
+    }
+
+    LexerWrapper lexer(&inputFile);
+
+    lexer.AddToken(TOK_INTEGER, [](const std::string text){
+        return yy::parser::make_INTEGER(std::stoi(text));
+    });
+
+    lexer.AddToken(TOK_PLUS, [](const std::string text){
+        return yy::parser::make_PLUS();
+    });
+
+    lexer.AddToken(TOK_EOF, [](const std::string text){
+        return yy::parser::make_YYEOF();
+    });
+
+
     std::cout << "Analyze ..." << std::endl;
 
-    yy::parser parserInstance = yy::parser();
+    yy::parser parserInstance = yy::parser(lexer);
     int parseResult = parserInstance.parse();
 
     if (parseResult != 0) 

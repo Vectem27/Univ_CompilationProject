@@ -1,8 +1,5 @@
 %{
-#include "parser.tab.hh"
-#include <cstdlib>
-#include <string>
-#include <FlexLexer.h>
+#include "Token.h"
 using namespace std;
 
 #define YY_NO_UNISTD_H
@@ -17,18 +14,12 @@ DIGIT   [0-9]
 ID      [a-zA-Z_][a-zA-Z0-9_]*
 
 %%
+{ID}        { ; }
+{DIGIT}+    { return TOK_INTEGER; }
 
-"print"     { ;/*return PRINT; */}
-"let"       { ;/*return LET; */}
+"+"         { return TOK_PLUS; }
 
-{ID}        { ;/*yylval->str = new std::string(yytext); return IDENT;*/ }
-{DIGIT}+    { ;/*yylval->num = atoi(yytext); return NUMBER;*/ }
-
-"="         { return '='; }
-";"         { return ';'; }
-"+"         { return '+'; }
-
-[ \t\n]+    ;  // ignore whitespace
-.           { std::cerr << "Caractère inconnu: " << yytext << "\n"; }
+[ \t\n]+    ;
+.           { std::cerr << "Unknown character: " << yytext << "\n"; }
 
 %%
