@@ -1,46 +1,54 @@
+%require "3.8"
+%language "c++"
+%define api.value.type variant
+%define api.token.constructor
+%define api.token.raw
+
 %code requires {
     #include "Ast.h"
+    #include <memory>
+    #include <string>
+    #include <vector>
+    #include <iostream>
+
+    
 }
 
+%code {
+    extern std::vector<std::shared_ptr<AstNodeBase>> ast;
 
-%{
-#include <iostream>
-#include <memory>
-#include <string>
-#include <vector>
-#include "Ast.h"
+    yy::parser::symbol_type yylex();
 
-std::vector<std::unique_ptr<Stmt>> ast;
-void yyerror(const char* s);
-int yylex(void);
-
-//void yyerror(const char* s) { std::cerr << "Erreur: " << s << "\n"; }
-%}
-
-%union {
-    int num;
-    std::string* str;
-    Stmt* stmt;
+    void yy::parser::error(const std::string& msg)
+    {
+        std::cerr << "Parse error: " << msg << std::endl;
+    }
 }
 
-%token <num> NUMBER
-%token <str> IDENT
-%token PRINT LET
+%define api.token.prefix {TOK_}
 
-%type <stmt> stmt
+%token <int> INTEGER
+%token
+  PLUS    "+"
+;
 
-%start program
+%type <std::shared_ptr<ExprNode>> expr
+
+%left "+";
 
 %%
 
-program:
-      program stmt   { ast.emplace_back($2); }
-    | stmt           { ast.emplace_back($1); }
+expr:
+      expr PLUS expr
+      {
+          std::cout << "Plus" << std::endl;
+          $$ = std::make_shared<BinaryOperatorNode>(BinaryOperation::ADD, $1, $3);
+          ast.push_back(std::static_pointer_cast<ExprNode>($$));
+      }
+    | INTEGER
+      {
+          std::cout << "Int: " << $1 << std::endl;
+          $$ = std::make_shared<Integer>($1);
+          ast.push_back(std::static_pointer_cast<ExprNode>($$));
+      }
     ;
-
-stmt:
-      PRINT NUMBER ';'        { $$ = new PrintStmt($2); }
-    | LET IDENT '=' NUMBER ';' { $$ = new LetStmt(*$2, $4); delete $2; }
-    ;
-
-%%

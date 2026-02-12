@@ -8,12 +8,12 @@ Pour faire fonctionner le projet, flex et bison sont requis.
 Leurs versions recommandés sont :
 
 - Flex 2.6.4
-- Bison 2.7
+- Bison 3.8.2
 
 **Installation recommandé** :
 
 Pour installer bison et flex sous windows, vous pouvez suivre ces étapes :
-> 1) Télécharger [Win flex-bison](https://sourceforge.net/projects/winflexbison/).
+> 1) Télécharger [win_flex_bison-x.x.x](https://github.com/lexxmark/winflexbison/releases/tag/v2.5.25).
 > 2) Extraire l'archive dans l'emplacement de votre choix.
 > 3) Ajouter une variable d'environement PATH vers le dossier extrait. ([Tutoriel](https://www.malekal.com/comment-modifier-la-variable-path-sous-windows-10-11/))
 > 4) Renommez win_bison.exe par bison.exe et win_flex.exe par flex.exe à l'intérieur du dossier.
