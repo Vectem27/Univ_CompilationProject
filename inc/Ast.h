@@ -3,6 +3,8 @@
 #include <iostream>
 #include <memory>
 #include <stdexcept>
+#include <vector>
+
 
 enum class ENodeValidationMessageType
 {
@@ -26,10 +28,13 @@ public:
     virtual bool Validate(INodeValidator& validator) const = 0;
 };
 
+
+
 struct AstNodeBase : public IValidable
 {
 public:
     virtual ~AstNodeBase() = default;
+    virtual int GenerateCode(std::ostream& os) const = 0;
 };
 
 enum class ExprTypeBase
@@ -99,6 +104,7 @@ public:
 
     std::string Eval() const override { return std::to_string(value); }
     virtual bool Validate(INodeValidator& validator) const override { return true; }
+    virtual int GenerateCode(std::ostream& os) const override { os << std::to_string(value); return 0;}
 };
 
 enum class BinaryOperation
@@ -119,24 +125,130 @@ public:
         : op(op), leftExpr(leftExpr), rightExpr(rightExpr)
     {}
 
-    virtual bool Validate(INodeValidator& validator) const override 
-    { 
-        if (leftExpr->GetType() != ExprTypeBase::STRING && leftExpr->GetType() != ExprTypeBase::USER_DEFINED &&
-            rightExpr->GetType() != ExprTypeBase::STRING && rightExpr->GetType() != ExprTypeBase::USER_DEFINED)
-            return true;
-
-        if (leftExpr->GetType() != ExprTypeBase::STRING || rightExpr->GetType() != ExprTypeBase::STRING)
-            validator.Send(ENodeValidationMessageType::Error, " do operations with strings.");
-
-        if (leftExpr->GetType() != ExprTypeBase::USER_DEFINED || rightExpr->GetType() != ExprTypeBase::USER_DEFINED)
-            validator.Send(ENodeValidationMessageType::Error, "Trying to do operations with user defined types.");
-
-        return false;
-    }
+    virtual bool Validate(INodeValidator& validator) const override;
 
     virtual ExprType GetType() const override 
     {
         return rightExpr->GetType();
     }
 
+    virtual int GenerateCode(std::ostream& os) const override;
+};
+
+struct VarAccessorNode : ExprNode
+{
+    std::string varName;
+public:
+    VarAccessorNode(std::string varName)
+        : varName(varName)
+    {}
+
+    virtual bool Validate(INodeValidator& validator) const override { return true; } // TODO: Validate var name with manager
+
+    virtual ExprType GetType() const override 
+    {
+        return ExprType(ExprTypeBase::INT); // TODO: Set type dynamically
+    }
+
+    virtual int GenerateCode(std::ostream& os) const override { os << varName; return 0; }
+};
+
+struct AssignationNode : ExprNode
+{
+    std::shared_ptr<ExprNode> target, value;
+public:
+    AssignationNode(std::shared_ptr<ExprNode> target, std::shared_ptr<ExprNode> value)
+        : target(target), value(value)
+    {}
+
+    virtual bool Validate(INodeValidator& validator) const override
+    {
+        return target->GetType() == value->GetType();
+    }
+
+    virtual ExprType GetType() const override 
+    {
+        return target->GetType();
+    }
+
+    virtual int GenerateCode(std::ostream& os) const override
+    {
+        //os << "(";
+        target->GenerateCode(os);
+        os << "=";
+        value->GenerateCode(os);
+        //os << ")";
+        return 0;
+    }
+};
+
+struct VarDeclaration : AstNodeBase
+{
+    ExprType type;
+    std::string varName;
+public:
+    VarDeclaration(ExprType type, std::string varName)
+        : type(type), varName(varName)
+    {}
+
+    virtual bool Validate(INodeValidator& validator) const override
+    {
+        return true;
+    }
+
+    virtual ExprType GetType() const 
+    {
+        return type;
+    }
+
+    virtual int GenerateCode(std::ostream& os) const override
+    {
+        std::string typeName;
+        switch (type.typeBase) 
+        {
+        case ExprTypeBase::INT:
+            typeName = "int";
+            break;
+        case ExprTypeBase::FLOAT:
+            typeName = "float";
+            break;
+        case ExprTypeBase::STRING:
+            typeName = "std::string";
+            break;
+        case ExprTypeBase::USER_DEFINED:
+            typeName = type.userDefinedSymbol;
+            break;
+        default:
+            throw std::runtime_error("Unknown var type");
+        }
+
+        os << typeName << " " << varName;
+        return 0;
+    }
+};
+
+struct PrintFunctionNode : AstNodeBase
+{
+    std::vector<std::shared_ptr<ExprNode>> expressions;
+public:
+    PrintFunctionNode(std::vector<std::shared_ptr<ExprNode>> expressions)
+        : expressions(expressions)
+    {}
+
+    virtual bool Validate(INodeValidator& validator) const override
+    {
+        return true;
+    }
+
+    virtual int GenerateCode(std::ostream& os) const override
+    {
+        os << "std::cout";
+        for(const auto& expr : expressions)
+        {
+            os << " << ";
+            expr->GenerateCode(os);
+        }
+        os << " << std::endl";
+        return 0;
+    }
 };

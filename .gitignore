@@ -4,4 +4,7 @@
 **/bin/
 **/Bin/
 
+.vscode/
+**/.cache/
+
 lex.yy.c
