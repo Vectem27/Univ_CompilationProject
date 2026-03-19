@@ -40,13 +40,14 @@
 %token <std::string> IDENTIFIER
 %token
   PLUS    "+"
-  //MINUS   "-"
-  //STAR    "*"
+  MINUS   "-"
+  STAR    "*"
   //SLASH   "/"
   //PERCENT "%"
   EQUAL   "="
   LPAREN  "("
   RPAREN  ")"
+  SEMICOLON ";"
 ;
 
 %token <std::string> PREDEF_FUNCTION
@@ -58,7 +59,10 @@
 %type <std::shared_ptr<AstNodeBase>> func
 
 %right EQUAL
-%left PLUS
+%left PLUS MINUS
+%left STAR SLASH PERCENT
+
+
 
 %start program
 
@@ -69,15 +73,15 @@ program:
     ;
 
 statement:
-    varDecl
+    varDecl ";"
     {
         ast.push_back($1);
     }
-    | func
+    | func ";"
     {
         ast.push_back($1);
     }
-    | expr
+    | expr ";"
     {
         ast.push_back($1);
     }
@@ -130,5 +134,14 @@ expr:
     {
         $$ = std::make_shared<BinaryOperatorNode>(BinaryOperation::ADD, $1, $3);
     }
+    | expr MINUS expr %prec MINUS
+    {
+        $$ = std::make_shared<BinaryOperatorNode>(BinaryOperation::SUBSTRACT, $1, $3);
+    }
+    | expr STAR expr %prec STAR
+    {
+        $$ = std::make_shared<BinaryOperatorNode>(BinaryOperation::MULTIPLY, $1, $3);
+    }
+
     ;
 

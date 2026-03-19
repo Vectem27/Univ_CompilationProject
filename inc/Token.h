@@ -17,5 +17,7 @@ enum Token
     TOK_LPAREN,
     TOK_RPAREN,
 
-    TOK_PREDEF_FUNCTION
+    TOK_PREDEF_FUNCTION,
+    TOK_SEMICOLON,
+
 };

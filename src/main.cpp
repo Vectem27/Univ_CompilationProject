@@ -59,14 +59,14 @@ int main(int argc, char* argv[])
         return yy::parser::make_PLUS();
     });
 
-    /*lexer.AddToken(TOK_MINUS, [](const std::string& text){
+    lexer.AddToken(TOK_MINUS, [](const std::string& text){
         return yy::parser::make_MINUS();
     });
 
     lexer.AddToken(TOK_STAR, [](const std::string& text){
         return yy::parser::make_STAR();
     });
-
+    /*
     lexer.AddToken(TOK_SLASH, [](const std::string& text){
         return yy::parser::make_SLASH();
     });
@@ -95,6 +95,10 @@ int main(int argc, char* argv[])
     lexer.AddToken(TOK_EOF, [](const std::string& text){
         return yy::parser::make_YYEOF();
     });
+    lexer.AddToken(TOK_SEMICOLON, [](const std::string& text){
+        return yy::parser::make_SEMICOLON();
+    });
+
 
 
     std::cout << "Analyze ..." << std::endl;

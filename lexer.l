@@ -27,6 +27,8 @@ ID      [a-zA-Z_][a-zA-Z0-9_]*
 "="         { return TOK_EQUAL; }
 "("         { return TOK_LPAREN; }
 ")"         { return TOK_RPAREN; }
+";"         { return TOK_SEMICOLON; }
+
 
 
 [ \t\n]+    ;
