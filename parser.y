@@ -42,8 +42,8 @@
   PLUS    "+"
   MINUS   "-"
   STAR    "*"
-  //SLASH   "/"
-  //PERCENT "%"
+  SLASH   "/"
+  PERCENT "%"
   EQUAL   "="
   LPAREN  "("
   RPAREN  ")"
@@ -141,6 +141,14 @@ expr:
     | expr STAR expr %prec STAR
     {
         $$ = std::make_shared<BinaryOperatorNode>(BinaryOperation::MULTIPLY, $1, $3);
+    }
+    | expr SLASH expr %prec SLASH
+    {
+        $$ = std::make_shared<BinaryOperatorNode>(BinaryOperation::DIVIDE, $1, $3);
+    }
+    | expr PERCENT expr %prec PERCENT
+    {
+        $$ = std::make_shared<BinaryOperatorNode>(BinaryOperation::MODULO, $1, $3);
     }
 
     ;

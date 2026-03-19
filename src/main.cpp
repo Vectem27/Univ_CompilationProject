@@ -66,14 +66,14 @@ int main(int argc, char* argv[])
     lexer.AddToken(TOK_STAR, [](const std::string& text){
         return yy::parser::make_STAR();
     });
-    /*
+
     lexer.AddToken(TOK_SLASH, [](const std::string& text){
         return yy::parser::make_SLASH();
     });
 
     lexer.AddToken(TOK_PERCENT, [](const std::string& text){
         return yy::parser::make_PERCENT();
-    });*/
+    });
 
     lexer.AddToken(TOK_PREDEF_FUNCTION, [](const std::string& text){
         return yy::parser::make_PREDEF_FUNCTION(text);
