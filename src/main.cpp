@@ -56,6 +56,12 @@ int main(int argc, char* argv[])
     });
 
     lexer.AddToken(TOK_STRING, [](const std::string& text){
+        const std::size_t firstQuote = text.find('"');
+        const std::size_t lastQuote = text.rfind('"');
+
+        if (firstQuote != std::string::npos && lastQuote != std::string::npos && lastQuote > firstQuote)
+            return yy::parser::make_STRING(text.substr(firstQuote + 1, lastQuote - firstQuote - 1));
+
         return yy::parser::make_STRING(text);
     });
 
@@ -94,7 +100,6 @@ int main(int argc, char* argv[])
     lexer.AddToken(TOK_RPAREN, [](const std::string& text){
         return yy::parser::make_RPAREN();
     });
-    
 
     lexer.AddToken(TOK_EQUAL, [](const std::string& text){
         return yy::parser::make_EQUAL();

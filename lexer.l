@@ -34,7 +34,6 @@ STRING  \"([^\\\"\n]|\\.)*\"
 ";"         { return TOK_SEMICOLON; }
 
 
-
 [ \t\n]+    ;
 .           { std::cerr << "Unknown character: " << yytext << "\n"; }
 

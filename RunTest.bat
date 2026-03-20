@@ -19,6 +19,7 @@ if %errorlevel% neq 0 (
     echo [!] C++ Compilation failed. Check your generated AST code!
     exit /b %errorlevel%
 )
+echo Success!
 
 echo.
 echo ==========================================
