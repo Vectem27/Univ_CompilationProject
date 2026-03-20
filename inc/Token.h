@@ -5,6 +5,8 @@ enum Token
     TOK_EOF = 0,
 
     TOK_INTEGER = 258,
+    TOK_STRING,
+    TOK_FLOAT,
     TOK_IDENT,
 
     TOK_PLUS,

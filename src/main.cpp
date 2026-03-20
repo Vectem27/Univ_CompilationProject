@@ -15,13 +15,13 @@ public:
     virtual void Send(ENodeValidationMessageType messageType, std::string message) override
     {
         if (messageType == ENodeValidationMessageType::Critical)
-            printf("Critical: %s", message.c_str());
+            printf("Critical: %s\n", message.c_str());
         else if (messageType == ENodeValidationMessageType::Error)
-            printf("Error: %s", message.c_str());
+            printf("Error: %s\n", message.c_str());
         else if (messageType == ENodeValidationMessageType::Warning) 
-            printf("Warning: %s", message.c_str());
-
-        printf("Info: %s", message.c_str());
+            printf("Warning: %s\n", message.c_str());
+        else if (messageType == ENodeValidationMessageType::Info)
+            printf("Info: %s\n", message.c_str());
     }
 };
 
@@ -49,6 +49,14 @@ int main(int argc, char* argv[])
 
     lexer.AddToken(TOK_INTEGER, [](const std::string& text){
         return yy::parser::make_INTEGER(std::stoi(text));
+    });
+
+    lexer.AddToken(TOK_FLOAT, [](const std::string& text){
+        return yy::parser::make_FLOAT(std::stod(text));
+    });
+
+    lexer.AddToken(TOK_STRING, [](const std::string& text){
+        return yy::parser::make_STRING(text);
     });
 
     lexer.AddToken(TOK_IDENT, [](const std::string& text){

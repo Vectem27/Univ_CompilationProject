@@ -12,11 +12,15 @@ using namespace std;
 
 DIGIT   [0-9]
 ID      [a-zA-Z_][a-zA-Z0-9_]*
+FLOAT   ({DIGIT}+\.{DIGIT}+|{DIGIT}+\.|\.{DIGIT}+)
+STRING  \"([^\\\"\n]|\\.)*\"
 
 %%
 "print"     { return TOK_PREDEF_FUNCTION; }
 
 {ID}        { return TOK_IDENT; }
+{STRING}    { return TOK_STRING; }
+{FLOAT}     { return TOK_FLOAT; }
 {DIGIT}+    { return TOK_INTEGER; }
 
 "+"         { return TOK_PLUS; }

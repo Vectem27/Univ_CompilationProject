@@ -37,6 +37,8 @@
 %define api.token.prefix {PARSER_TOK_}
 
 %token <int> INTEGER
+%token <double> FLOAT
+%token <std::string> STRING
 %token <std::string> IDENTIFIER
 %token
   PLUS    "+"
@@ -112,6 +114,10 @@ varDecl:
     {
         if ($1 == "int32")
             $$ = std::make_shared<VarDeclaration>(ExprType(ExprTypeBase::INT), $2);
+        else if ($1 == "float")
+            $$ = std::make_shared<VarDeclaration>(ExprType(ExprTypeBase::FLOAT), $2);
+        else if ($1 == "string")
+            $$ = std::make_shared<VarDeclaration>(ExprType(ExprTypeBase::STRING), $2);
         else
             $$ = std::make_shared<VarDeclaration>(ExprType($1), $2);
     }
@@ -122,31 +128,43 @@ expr:
     {
         $$ = std::make_shared<Integer>($1);
     }
+    | FLOAT
+    {
+        $$ = std::make_shared<Float>($1);
+    }
+    | STRING
+    {
+        $$ = std::make_shared<String>($1);
+    }
     | IDENTIFIER
     {
         $$ = std::make_shared<VarAccessorNode>($1);
     }
-    | expr EQUAL expr %prec EQUAL
+    | "(" expr ")"
+    { 
+        $$ = $2;
+    }
+    | expr "=" expr %prec "="
     {
         $$ = std::make_shared<AssignationNode>($1, $3);
     }
-    | expr PLUS expr %prec PLUS
+    | expr "+" expr %prec "+"
     {
         $$ = std::make_shared<BinaryOperatorNode>(BinaryOperation::ADD, $1, $3);
     }
-    | expr MINUS expr %prec MINUS
+    | expr "-" expr %prec "-"
     {
         $$ = std::make_shared<BinaryOperatorNode>(BinaryOperation::SUBSTRACT, $1, $3);
     }
-    | expr STAR expr %prec STAR
+    | expr "*" expr %prec "*"
     {
         $$ = std::make_shared<BinaryOperatorNode>(BinaryOperation::MULTIPLY, $1, $3);
     }
-    | expr SLASH expr %prec SLASH
+    | expr "/" expr %prec "/"
     {
         $$ = std::make_shared<BinaryOperatorNode>(BinaryOperation::DIVIDE, $1, $3);
     }
-    | expr PERCENT expr %prec PERCENT
+    | expr "%" expr %prec "%"
     {
         $$ = std::make_shared<BinaryOperatorNode>(BinaryOperation::MODULO, $1, $3);
     }

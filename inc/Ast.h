@@ -3,6 +3,7 @@
 #include <iostream>
 #include <memory>
 #include <stdexcept>
+#include <unordered_map>
 #include <vector>
 
 
@@ -64,6 +65,21 @@ public:
             throw std::invalid_argument("Constructing expression type as 'user defined' with an empty user defined value.");
     }
 
+    bool IsNumber() const
+    {
+        return typeBase == ExprTypeBase::INT || typeBase == ExprTypeBase::FLOAT;
+    }
+
+    bool IsString() const
+    {
+        return typeBase == ExprTypeBase::STRING;
+    }
+
+    bool IsUserDefined() const
+    {
+        return typeBase == ExprTypeBase::USER_DEFINED;
+    }
+
     bool operator==(ExprType o) const 
     { 
         return typeBase == o.typeBase && (typeBase == ExprTypeBase::USER_DEFINED ? userDefinedSymbol == o.userDefinedSymbol : true); 
@@ -76,6 +92,43 @@ public:
 
     bool operator!=(ExprType o) const { return !(*this == o); }
     bool operator!=(ExprTypeBase typeBase) const { return !(*this == typeBase); }
+};
+
+class SymbolTable
+{
+    std::unordered_map<std::string, ExprType> symbols;
+
+    SymbolTable() = default;
+
+public:
+    SymbolTable(const SymbolTable&) = delete;
+    SymbolTable& operator=(const SymbolTable&) = delete;
+
+    static SymbolTable& GetInstance()
+    {
+        static SymbolTable instance;
+        return instance;
+    }
+
+    void SetType(const std::string& name, const ExprType& type)
+    {
+        symbols.insert_or_assign(name, type);
+    }
+
+    bool TryGetType(const std::string& name, ExprType& outType) const
+    {
+        auto entry = symbols.find(name);
+        if (entry == symbols.end())
+            return false;
+
+        outType = entry->second;
+        return true;
+    }
+
+    void Clear()
+    {
+        symbols.clear();
+    }
 };
 
 struct ExprNode : public AstNodeBase
@@ -104,7 +157,33 @@ public:
 
     std::string Eval() const override { return std::to_string(value); }
     virtual bool Validate(INodeValidator& validator) const override { return true; }
-    virtual int GenerateCode(std::ostream& os) const override { os << std::to_string(value); return 0;}
+    virtual int GenerateCode(std::ostream& os) const override { os << value; return 0;}
+};
+
+struct Float : public ConstExprNode
+{
+    double value;
+public:
+    Float(double value) : value(value) {}
+
+    virtual ExprType GetType() const override { return ExprType(ExprTypeBase::FLOAT); }
+
+    std::string Eval() const override { return std::to_string(value); }
+    virtual bool Validate(INodeValidator& validator) const override { return true; }
+    virtual int GenerateCode(std::ostream& os) const override { os << value; return 0; }
+};
+
+struct String : public ConstExprNode
+{
+    std::string value;
+public:
+    String(std::string value) : value(value) {}
+
+    virtual ExprType GetType() const override { return ExprType(ExprTypeBase::STRING); }
+
+    std::string Eval() const override { return value; }
+    virtual bool Validate(INodeValidator& validator) const override { return true; }
+    virtual int GenerateCode(std::ostream& os) const override { os << '"' << value << '"'; return 0; }
 };
 
 enum class BinaryOperation
@@ -147,7 +226,11 @@ public:
 
     virtual ExprType GetType() const override 
     {
-        return ExprType(ExprTypeBase::INT); // TODO: Set type dynamically
+        ExprType symbolType = ExprType(ExprTypeBase::INT);
+        if (SymbolTable::GetInstance().TryGetType(varName, symbolType))
+            return symbolType;
+
+        return ExprType(ExprTypeBase::INT); // TODO: Report unknown symbols explicitly
     }
 
     virtual int GenerateCode(std::ostream& os) const override { os << varName; return 0; }
@@ -163,7 +246,14 @@ public:
 
     virtual bool Validate(INodeValidator& validator) const override
     {
-        return target->GetType() == value->GetType();
+        if (target->GetType().IsNumber() && value->GetType().IsNumber())
+            return true;
+
+        if(target->GetType() == value->GetType())
+            return true;
+
+        validator.Send(ENodeValidationMessageType::Error, "Trying to assign value of different types.");
+        return false;
     }
 
     virtual ExprType GetType() const override 
@@ -189,7 +279,9 @@ struct VarDeclaration : AstNodeBase
 public:
     VarDeclaration(ExprType type, std::string varName)
         : type(type), varName(varName)
-    {}
+    {
+        SymbolTable::GetInstance().SetType(this->varName, this->type);
+    }
 
     virtual bool Validate(INodeValidator& validator) const override
     {

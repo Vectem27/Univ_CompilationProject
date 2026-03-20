@@ -2,14 +2,13 @@
 
 bool BinaryOperatorNode::Validate(INodeValidator& validator) const 
 { 
-    if (leftExpr->GetType() != ExprTypeBase::STRING && leftExpr->GetType() != ExprTypeBase::USER_DEFINED &&
-        rightExpr->GetType() != ExprTypeBase::STRING && rightExpr->GetType() != ExprTypeBase::USER_DEFINED)
+    if (leftExpr->GetType().IsNumber() && rightExpr->GetType().IsNumber())
         return true;
 
-    if (leftExpr->GetType() != ExprTypeBase::STRING || rightExpr->GetType() != ExprTypeBase::STRING)
+    if (leftExpr->GetType().IsString() || rightExpr->GetType().IsString())
         validator.Send(ENodeValidationMessageType::Error, " do operations with strings.");
 
-    if (leftExpr->GetType() != ExprTypeBase::USER_DEFINED || rightExpr->GetType() != ExprTypeBase::USER_DEFINED)
+    if (leftExpr->GetType().IsUserDefined() || rightExpr->GetType().IsUserDefined())
         validator.Send(ENodeValidationMessageType::Error, "Trying to do operations with user defined types.");
 
     return false;
