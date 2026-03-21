@@ -22,4 +22,14 @@ enum Token
     TOK_PREDEF_FUNCTION,
     TOK_SEMICOLON,
 
+    TOK_TRUE,
+    TOK_FALSE,
+
+    TOK_EQEQ,
+    TOK_NEQ,
+    TOK_LT,
+    TOK_LTE,
+    TOK_GT,
+    TOK_GTE,
+
 };

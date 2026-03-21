@@ -50,7 +50,16 @@
   LPAREN  "("
   RPAREN  ")"
   SEMICOLON ";"
+  EQEQ    "=="
+  NEQ     "!="
+  LT      "<"
+  LTE     "<="
+  GT      ">"
+  GTE     ">="
 ;
+
+%token TRUE_LIT "true"
+%token FALSE_LIT "false"
 
 %token <std::string> PREDEF_FUNCTION
 
@@ -61,6 +70,8 @@
 %type <std::shared_ptr<AstNodeBase>> func
 
 %right EQUAL
+%left EQEQ NEQ
+%left LT LTE GT GTE
 %left PLUS MINUS
 %left STAR SLASH PERCENT
 
@@ -118,6 +129,8 @@ varDecl:
             $$ = std::make_shared<VarDeclaration>(ExprType(ExprTypeBase::FLOAT), $2);
         else if ($1 == "string")
             $$ = std::make_shared<VarDeclaration>(ExprType(ExprTypeBase::STRING), $2);
+        else if ($1 == "bool")
+            $$ = std::make_shared<VarDeclaration>(ExprType(ExprTypeBase::BOOL), $2);
         else
             $$ = std::make_shared<VarDeclaration>(ExprType($1), $2);
     }
@@ -167,6 +180,38 @@ expr:
     | expr "%" expr %prec "%"
     {
         $$ = std::make_shared<BinaryOperatorNode>(BinaryOperation::MODULO, $1, $3);
+    }
+    | TRUE_LIT
+    {
+        $$ = std::make_shared<Bool>(true);
+    }
+    | FALSE_LIT
+    {
+        $$ = std::make_shared<Bool>(false);
+    }
+    | expr "==" expr
+    {
+        $$ = std::make_shared<ComparisonNode>(ComparisonOperation::EQ, $1, $3);
+    }
+    | expr "!=" expr
+    {
+        $$ = std::make_shared<ComparisonNode>(ComparisonOperation::NEQ, $1, $3);
+    }
+    | expr "<" expr
+    {
+        $$ = std::make_shared<ComparisonNode>(ComparisonOperation::LT, $1, $3);
+    }
+    | expr "<=" expr
+    {
+        $$ = std::make_shared<ComparisonNode>(ComparisonOperation::LTE, $1, $3);
+    }
+    | expr ">" expr
+    {
+        $$ = std::make_shared<ComparisonNode>(ComparisonOperation::GT, $1, $3);
+    }
+    | expr ">=" expr
+    {
+        $$ = std::make_shared<ComparisonNode>(ComparisonOperation::GTE, $1, $3);
     }
 
     ;

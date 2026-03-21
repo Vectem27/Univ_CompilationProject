@@ -43,6 +43,7 @@ enum class ExprTypeBase
     INT,
     FLOAT,
     STRING,
+    BOOL,
     USER_DEFINED
 };
 
@@ -67,7 +68,7 @@ public:
 
     bool IsNumber() const
     {
-        return typeBase == ExprTypeBase::INT || typeBase == ExprTypeBase::FLOAT;
+        return typeBase == ExprTypeBase::INT || typeBase == ExprTypeBase::FLOAT || typeBase == ExprTypeBase::BOOL;
     }
 
     bool IsString() const
@@ -186,6 +187,19 @@ public:
     virtual int GenerateCode(std::ostream& os) const override { os << '"' << value << '"'; return 0; }
 };
 
+struct Bool : public ConstExprNode
+{
+    bool value;
+public:
+    Bool(bool value) : value(value) {}
+
+    virtual ExprType GetType() const override { return ExprType(ExprTypeBase::BOOL); }
+
+    std::string Eval() const override { return value ? "true" : "false"; }
+    virtual bool Validate(INodeValidator& validator) const override { return true; }
+    virtual int GenerateCode(std::ostream& os) const override { os << (value ? "true" : "false"); return 0; }
+};
+
 enum class BinaryOperation
 {
     ADD,
@@ -193,6 +207,35 @@ enum class BinaryOperation
     MULTIPLY,
     DIVIDE,
     MODULO
+};
+
+enum class ComparisonOperation
+{
+    EQ,
+    NEQ,
+    LT,
+    LTE,
+    GT,
+    GTE
+};
+
+struct ComparisonNode : ExprNode
+{
+    ComparisonOperation op;
+    std::shared_ptr<ExprNode> leftExpr, rightExpr;
+public:
+    ComparisonNode(ComparisonOperation op, std::shared_ptr<ExprNode> leftExpr, std::shared_ptr<ExprNode> rightExpr)
+        : op(op), leftExpr(leftExpr), rightExpr(rightExpr)
+    {}
+
+    virtual bool Validate(INodeValidator& validator) const override;
+
+    virtual ExprType GetType() const override
+    {
+        return ExprType(ExprTypeBase::BOOL);
+    }
+
+    virtual int GenerateCode(std::ostream& os) const override;
 };
 
 struct BinaryOperatorNode : ExprNode
@@ -306,6 +349,9 @@ public:
             break;
         case ExprTypeBase::STRING:
             typeName = "std::string";
+            break;
+        case ExprTypeBase::BOOL:
+            typeName = "bool";
             break;
         case ExprTypeBase::USER_DEFINED:
             typeName = type.userDefinedSymbol;

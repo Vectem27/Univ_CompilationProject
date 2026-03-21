@@ -1,5 +1,47 @@
 #include "Ast.h"
 
+bool ComparisonNode::Validate(INodeValidator& validator) const
+{
+    if (op == ComparisonOperation::EQ || op == ComparisonOperation::NEQ)
+    {
+        if (leftExpr->GetType() == rightExpr->GetType())
+            return true;
+        if (leftExpr->GetType().IsNumber() && rightExpr->GetType().IsNumber())
+            return true;
+    }
+    else
+    {
+        if (leftExpr->GetType().IsNumber() && rightExpr->GetType().IsNumber())
+            return true;
+    }
+
+    validator.Send(ENodeValidationMessageType::Error, "Incompatible types in comparison.");
+    return false;
+}
+
+int ComparisonNode::GenerateCode(std::ostream& os) const
+{
+    std::string opStr;
+    switch (op)
+    {
+    case ComparisonOperation::EQ:  opStr = "=="; break;
+    case ComparisonOperation::NEQ: opStr = "!="; break;
+    case ComparisonOperation::LT:  opStr = "<";  break;
+    case ComparisonOperation::LTE: opStr = "<="; break;
+    case ComparisonOperation::GT:  opStr = ">";  break;
+    case ComparisonOperation::GTE: opStr = ">="; break;
+    default:
+        throw std::runtime_error("Unknown comparison operator");
+    }
+
+    os << "(";
+    leftExpr->GenerateCode(os);
+    os << opStr;
+    rightExpr->GenerateCode(os);
+    os << ")";
+    return 0;
+}
+
 bool BinaryOperatorNode::Validate(INodeValidator& validator) const 
 { 
     if (leftExpr->GetType().IsNumber() && rightExpr->GetType().IsNumber())

@@ -17,6 +17,8 @@ STRING  \"([^\\\"\n]|\\.)*\"
 
 %%
 "print"     { return TOK_PREDEF_FUNCTION; }
+"true"      { return TOK_TRUE; }
+"false"     { return TOK_FALSE; }
 
 {ID}        { return TOK_IDENT; }
 {STRING}    { return TOK_STRING; }
@@ -28,6 +30,12 @@ STRING  \"([^\\\"\n]|\\.)*\"
 "*"         { return TOK_STAR; }
 "/"         { return TOK_SLASH; }
 "%"         { return TOK_PERCENT; }
+"=="        { return TOK_EQEQ; }
+"!="        { return TOK_NEQ; }
+"<="        { return TOK_LTE; }
+">="        { return TOK_GTE; }
+"<"         { return TOK_LT; }
+">"         { return TOK_GT; }
 "="         { return TOK_EQUAL; }
 "("         { return TOK_LPAREN; }
 ")"         { return TOK_RPAREN; }

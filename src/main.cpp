@@ -105,6 +105,38 @@ int main(int argc, char* argv[])
         return yy::parser::make_EQUAL();
     });
 
+    lexer.AddToken(TOK_EQEQ, [](const std::string& text){
+        return yy::parser::make_EQEQ();
+    });
+
+    lexer.AddToken(TOK_NEQ, [](const std::string& text){
+        return yy::parser::make_NEQ();
+    });
+
+    lexer.AddToken(TOK_LT, [](const std::string& text){
+        return yy::parser::make_LT();
+    });
+
+    lexer.AddToken(TOK_LTE, [](const std::string& text){
+        return yy::parser::make_LTE();
+    });
+
+    lexer.AddToken(TOK_GT, [](const std::string& text){
+        return yy::parser::make_GT();
+    });
+
+    lexer.AddToken(TOK_GTE, [](const std::string& text){
+        return yy::parser::make_GTE();
+    });
+
+    lexer.AddToken(TOK_TRUE, [](const std::string& text){
+        return yy::parser::make_TRUE_LIT();
+    });
+
+    lexer.AddToken(TOK_FALSE, [](const std::string& text){
+        return yy::parser::make_FALSE_LIT();
+    });
+
     lexer.AddToken(TOK_EOF, [](const std::string& text){
         return yy::parser::make_YYEOF();
     });

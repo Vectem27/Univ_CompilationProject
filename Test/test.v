@@ -27,3 +27,14 @@ float testFloatLiteral;
 testFloatLiteral = 3.5 + 0.25;
 print("Should be 3.75");
 print(testFloatLiteral);
+
+bool testBool;
+testBool = test2 <= testFloatLiteral;
+print("Should be 1");
+print(testBool);
+
+print("Should be 1");
+print(test == 8);
+
+print("Should be 0");
+print(1 == 2);
