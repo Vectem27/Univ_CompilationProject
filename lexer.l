@@ -39,6 +39,8 @@ STRING  \"([^\\\"\n]|\\.)*\"
 "="         { return TOK_EQUAL; }
 "("         { return TOK_LPAREN; }
 ")"         { return TOK_RPAREN; }
+"{"         { return TOK_LBRACE; }
+"}"         { return TOK_RBRACE; }
 ";"         { return TOK_SEMICOLON; }
 
 

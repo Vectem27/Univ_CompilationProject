@@ -49,6 +49,8 @@
   EQUAL   "="
   LPAREN  "("
   RPAREN  ")"
+    LBRACE  "{"
+    RBRACE  "}"
   SEMICOLON ";"
   EQEQ    "=="
   NEQ     "!="
@@ -64,9 +66,11 @@
 %token <std::string> PREDEF_FUNCTION
 
 %type <std::shared_ptr<AstNodeBase>> statement
+%type <std::shared_ptr<AstNodeBase>> block
 %type <std::shared_ptr<ExprNode>> expr
 %type <std::shared_ptr<VarDeclaration>> varDecl
 %type <std::vector<std::shared_ptr<ExprNode>>> exprList
+%type <std::vector<std::shared_ptr<AstNodeBase>>> statementList
 %type <std::shared_ptr<AstNodeBase>> func
 
 %right EQUAL
@@ -83,20 +87,46 @@
 program:
     /* empty */
     | program statement
+    {
+        ast.push_back($2);
+    }
     ;
 
 statement:
     varDecl ";"
     {
-        ast.push_back($1);
+        $$ = $1;
     }
     | func ";"
     {
-        ast.push_back($1);
+        $$ = $1;
     }
     | expr ";"
     {
-        ast.push_back($1);
+        $$ = $1;
+    }
+    | block
+    {
+        $$ = $1;
+    }
+    ;
+
+statementList:
+    /* empty */
+    {
+        $$ = std::vector<std::shared_ptr<AstNodeBase>>{};
+    }
+    | statementList statement
+    {
+        $1.push_back($2);
+        $$ = $1;
+    }
+    ;
+
+block:
+    "{" statementList "}"
+    {
+        $$ = std::make_shared<ScopeBlockNode>($2);
     }
     ;
 
@@ -123,7 +153,7 @@ exprList:
 varDecl:
     IDENTIFIER IDENTIFIER
     {
-        if ($1 == "int32")
+        if ($1 == "int")
             $$ = std::make_shared<VarDeclaration>(ExprType(ExprTypeBase::INT), $2);
         else if ($1 == "float")
             $$ = std::make_shared<VarDeclaration>(ExprType(ExprTypeBase::FLOAT), $2);

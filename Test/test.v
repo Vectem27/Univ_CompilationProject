@@ -2,17 +2,17 @@ string testMessage;
 testMessage = "Bonjour\n";
 print("Message : " testMessage);
 
-int32 test;
+int test;
 test = 6 + 2;
 print("Should be 8");
 print(test);
 
-int32 testDivide;
+int testDivide;
 testDivide = 12 / 2 / 2;
 print("Should be 3");
 print(testDivide);
 
-int32 testModulo;
+int testModulo;
 testModulo = 6 % 4;
 print("Should be 2");
 print(testModulo);
@@ -38,3 +38,8 @@ print(test == 8);
 
 print("Should be 0");
 print(1 == 2);
+
+{
+    int testBlock;
+    testBlock = 25;
+}

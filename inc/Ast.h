@@ -68,7 +68,7 @@ public:
 
     bool IsNumber() const
     {
-        return typeBase == ExprTypeBase::INT || typeBase == ExprTypeBase::FLOAT || typeBase == ExprTypeBase::BOOL;
+        return typeBase == ExprTypeBase::INT || typeBase == ExprTypeBase::FLOAT;
     }
 
     bool IsString() const
@@ -97,9 +97,12 @@ public:
 
 class SymbolTable
 {
-    std::unordered_map<std::string, ExprType> symbols;
+    std::vector<std::unordered_map<std::string, ExprType>> scopes;
 
-    SymbolTable() = default;
+    SymbolTable()
+    {
+        scopes.emplace_back();
+    }
 
 public:
     SymbolTable(const SymbolTable&) = delete;
@@ -111,24 +114,48 @@ public:
         return instance;
     }
 
-    void SetType(const std::string& name, const ExprType& type)
+    void EnterScope()
     {
-        symbols.insert_or_assign(name, type);
+        scopes.emplace_back();
+    }
+
+    void ExitScope()
+    {
+        if (scopes.size() <= 1)
+            throw std::runtime_error("Attempted to pop global scope.");
+
+        scopes.pop_back();
+    }
+
+    bool DeclareType(const std::string& name, const ExprType& type)
+    {
+        auto& currentScope = scopes.back();
+        if (currentScope.find(name) != currentScope.end())
+            return false;
+
+        currentScope.insert_or_assign(name, type);
+        return true;
     }
 
     bool TryGetType(const std::string& name, ExprType& outType) const
     {
-        auto entry = symbols.find(name);
-        if (entry == symbols.end())
-            return false;
+        for (auto scope = scopes.rbegin(); scope != scopes.rend(); ++scope)
+        {
+            auto entry = scope->find(name);
+            if (entry == scope->end())
+                continue;
 
-        outType = entry->second;
-        return true;
+            outType = entry->second;
+            return true;
+        }
+
+        return false;
     }
 
     void Clear()
     {
-        symbols.clear();
+        scopes.clear();
+        scopes.emplace_back();
     }
 };
 
@@ -265,7 +292,15 @@ public:
         : varName(varName)
     {}
 
-    virtual bool Validate(INodeValidator& validator) const override { return true; } // TODO: Validate var name with manager
+    virtual bool Validate(INodeValidator& validator) const override
+    {
+        ExprType symbolType = ExprType(ExprTypeBase::INT);
+        if (SymbolTable::GetInstance().TryGetType(varName, symbolType))
+            return true;
+
+        validator.Send(ENodeValidationMessageType::Error, "Unknown variable: " + varName);
+        return false;
+    }
 
     virtual ExprType GetType() const override 
     {
@@ -289,6 +324,9 @@ public:
 
     virtual bool Validate(INodeValidator& validator) const override
     {
+        if (!target->Validate(validator) || !value->Validate(validator))
+            return false;
+
         if (target->GetType().IsNumber() && value->GetType().IsNumber())
             return true;
 
@@ -322,12 +360,16 @@ struct VarDeclaration : AstNodeBase
 public:
     VarDeclaration(ExprType type, std::string varName)
         : type(type), varName(varName)
-    {
-        SymbolTable::GetInstance().SetType(this->varName, this->type);
-    }
+    {}
 
     virtual bool Validate(INodeValidator& validator) const override
     {
+        if (!SymbolTable::GetInstance().DeclareType(varName, type))
+        {
+            validator.Send(ENodeValidationMessageType::Error, "Variable already declared in this scope: " + varName);
+            return false;
+        }
+
         return true;
     }
 
@@ -365,6 +407,46 @@ public:
     }
 };
 
+struct ScopeBlockNode : AstNodeBase
+{
+    std::vector<std::shared_ptr<AstNodeBase>> statements;
+public:
+    ScopeBlockNode(std::vector<std::shared_ptr<AstNodeBase>> statements)
+        : statements(statements)
+    {}
+
+    virtual bool Validate(INodeValidator& validator) const override
+    {
+        SymbolTable::GetInstance().EnterScope();
+
+        for (const auto& statement : statements)
+        {
+            if (statement->Validate(validator))
+                continue;
+
+            SymbolTable::GetInstance().ExitScope();
+            return false;
+        }
+
+        SymbolTable::GetInstance().ExitScope();
+        return true;
+    }
+
+    virtual int GenerateCode(std::ostream& os) const override
+    {
+        os << "{" << std::endl;
+        for (const auto& statement : statements)
+        {
+            os << "    ";
+            statement->GenerateCode(os);
+            os << ";" << std::endl;
+        }
+        os << "}";
+
+        return 0;
+    }
+};
+
 struct PrintFunctionNode : AstNodeBase
 {
     std::vector<std::shared_ptr<ExprNode>> expressions;
@@ -375,6 +457,14 @@ public:
 
     virtual bool Validate(INodeValidator& validator) const override
     {
+        for (const auto& expr : expressions)
+        {
+            if (expr->Validate(validator))
+                continue;
+
+            return false;
+        }
+
         return true;
     }
 

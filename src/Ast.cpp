@@ -2,6 +2,9 @@
 
 bool ComparisonNode::Validate(INodeValidator& validator) const
 {
+    if (!leftExpr->Validate(validator) || !rightExpr->Validate(validator))
+        return false;
+
     if (op == ComparisonOperation::EQ || op == ComparisonOperation::NEQ)
     {
         if (leftExpr->GetType() == rightExpr->GetType())
@@ -44,6 +47,9 @@ int ComparisonNode::GenerateCode(std::ostream& os) const
 
 bool BinaryOperatorNode::Validate(INodeValidator& validator) const 
 { 
+    if (!leftExpr->Validate(validator) || !rightExpr->Validate(validator))
+        return false;
+
     if (leftExpr->GetType().IsNumber() && rightExpr->GetType().IsNumber())
         return true;
 

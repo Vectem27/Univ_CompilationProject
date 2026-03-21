@@ -101,6 +101,14 @@ int main(int argc, char* argv[])
         return yy::parser::make_RPAREN();
     });
 
+    lexer.AddToken(TOK_LBRACE, [](const std::string& text){
+        return yy::parser::make_LBRACE();
+    });
+
+    lexer.AddToken(TOK_RBRACE, [](const std::string& text){
+        return yy::parser::make_RBRACE();
+    });
+
     lexer.AddToken(TOK_EQUAL, [](const std::string& text){
         return yy::parser::make_EQUAL();
     });

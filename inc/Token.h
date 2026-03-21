@@ -18,6 +18,8 @@ enum Token
 
     TOK_LPAREN,
     TOK_RPAREN,
+    TOK_LBRACE,
+    TOK_RBRACE,
 
     TOK_PREDEF_FUNCTION,
     TOK_SEMICOLON,
