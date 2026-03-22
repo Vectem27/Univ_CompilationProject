@@ -447,6 +447,32 @@ public:
     }
 };
 
+struct WhileNode : AstNodeBase
+{
+    std::shared_ptr<ExprNode> condition;
+    std::shared_ptr<AstNodeBase> body;
+public:
+    WhileNode(std::shared_ptr<ExprNode> condition, std::shared_ptr<AstNodeBase> body)
+        : condition(condition), body(body)
+    {}
+
+    virtual bool Validate(INodeValidator& validator) const override;
+    virtual int GenerateCode(std::ostream& os) const override;
+};
+
+struct DoWhileNode : AstNodeBase
+{
+    std::shared_ptr<ExprNode> condition;
+    std::shared_ptr<AstNodeBase> body;
+public:
+    DoWhileNode(std::shared_ptr<ExprNode> condition, std::shared_ptr<AstNodeBase> body)
+        : condition(condition), body(body)
+    {}
+
+    virtual bool Validate(INodeValidator& validator) const override;
+    virtual int GenerateCode(std::ostream& os) const override;
+};
+
 struct IfNode : AstNodeBase
 {
     std::shared_ptr<ExprNode> condition;

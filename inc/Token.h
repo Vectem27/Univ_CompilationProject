@@ -35,5 +35,8 @@ enum Token
     TOK_GTE,
 
     TOK_IF,
-    TOK_ELSE
+    TOK_ELSE,
+
+    TOK_WHILE,
+    TOK_DO,
 };

@@ -64,6 +64,8 @@
 %token FALSE_LIT "false"
 %token IF_KW "if"
 %token ELSE_KW "else"
+%token WHILE_KW "while"
+%token DO_KW "do"
 
 %token <std::string> PREDEF_FUNCTION
 
@@ -120,6 +122,14 @@ statement:
     | "if" "(" expr ")" statement "else" statement
     {
         $$ = std::make_shared<IfNode>($3, $5, $7);
+    }
+    | "while" "(" expr ")" statement
+    {
+        $$ = std::make_shared<WhileNode>($3, $5);
+    }
+    | "do" statement "while" "(" expr ")" ";"
+    {
+        $$ = std::make_shared<DoWhileNode>($5, $2);
     }
     ;
 

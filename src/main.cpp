@@ -153,6 +153,14 @@ int main(int argc, char* argv[])
         return yy::parser::make_ELSE_KW();
     });
 
+    lexer.AddToken(TOK_WHILE, [](const std::string& text){
+        return yy::parser::make_WHILE_KW();
+    });
+
+    lexer.AddToken(TOK_DO, [](const std::string& text){
+        return yy::parser::make_DO_KW();
+    });
+
     lexer.AddToken(TOK_EOF, [](const std::string& text){
         return yy::parser::make_YYEOF();
     });

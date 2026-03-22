@@ -21,6 +21,8 @@ STRING  \"([^\\\"\n]|\\.)*\"
 "false"     { return TOK_FALSE; }
 "if"        { return TOK_IF; }
 "else"      { return TOK_ELSE; }
+"while"     { return TOK_WHILE; }
+"do"        { return TOK_DO; }
 
 {ID}        { return TOK_IDENT; }
 {STRING}    { return TOK_STRING; }

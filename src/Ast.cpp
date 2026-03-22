@@ -95,6 +95,57 @@ int BinaryOperatorNode::GenerateCode(std::ostream& os) const
     return 0;
 }
 
+bool WhileNode::Validate(INodeValidator& validator) const
+{
+    if (!condition->Validate(validator))
+        return false;
+
+    if (condition->GetType() != ExprTypeBase::BOOL)
+    {
+        validator.Send(ENodeValidationMessageType::Error, "While condition must be of type bool.");
+        return false;
+    }
+
+    return body->Validate(validator);
+}
+
+int WhileNode::GenerateCode(std::ostream& os) const
+{
+    os << "while (";
+    condition->GenerateCode(os);
+    os << ") ";
+    bool isBlock = dynamic_cast<ScopeBlockNode*>(body.get()) != nullptr;
+    body->GenerateCode(os);
+    if (!isBlock) os << ";";
+    return 0;
+}
+
+bool DoWhileNode::Validate(INodeValidator& validator) const
+{
+    if (!condition->Validate(validator))
+        return false;
+
+    if (condition->GetType() != ExprTypeBase::BOOL)
+    {
+        validator.Send(ENodeValidationMessageType::Error, "Do-while condition must be of type bool.");
+        return false;
+    }
+
+    return body->Validate(validator);
+}
+
+int DoWhileNode::GenerateCode(std::ostream& os) const
+{
+    os << "do ";
+    bool isBlock = dynamic_cast<ScopeBlockNode*>(body.get()) != nullptr;
+    body->GenerateCode(os);
+    if (!isBlock) os << ";";
+    os << " while (";
+    condition->GenerateCode(os);
+    os << ")";
+    return 0;
+}
+
 bool IfNode::Validate(INodeValidator& validator) const
 {
     if (!condition->Validate(validator))

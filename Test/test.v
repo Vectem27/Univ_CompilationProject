@@ -53,3 +53,10 @@ else
     test2 = 20;
     print("Should be 20 : " test2);
 }
+
+int ctr;
+ctr = 0;
+while(ctr < 5)
+    ctr = ctr + 1;
+
+print("Should be 5\n" ctr);
