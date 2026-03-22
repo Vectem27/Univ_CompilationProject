@@ -94,3 +94,42 @@ int BinaryOperatorNode::GenerateCode(std::ostream& os) const
     os << ")";
     return 0;
 }
+
+bool IfNode::Validate(INodeValidator& validator) const
+{
+    if (!condition->Validate(validator))
+        return false;
+
+    if (condition->GetType() != ExprTypeBase::BOOL)
+    {
+        validator.Send(ENodeValidationMessageType::Error, "If condition must be of type bool.");
+        return false;
+    }
+
+    if (!thenBody->Validate(validator))
+        return false;
+
+    if (elseBody && !elseBody->Validate(validator))
+        return false;
+
+    return true;
+}
+
+int IfNode::GenerateCode(std::ostream& os) const
+{
+    os << "if (";
+    condition->GenerateCode(os);
+    os << ") ";
+    bool thenIsBlock = dynamic_cast<ScopeBlockNode*>(thenBody.get()) != nullptr;
+    thenBody->GenerateCode(os);
+    if (!thenIsBlock) os << ";";
+
+    if (elseBody)
+    {
+        os << std::endl << "    else ";
+        bool elseIsBlock = dynamic_cast<ScopeBlockNode*>(elseBody.get()) != nullptr;
+        elseBody->GenerateCode(os);
+        if (!elseIsBlock) os << ";";
+    }
+    return 0;
+}

@@ -447,6 +447,22 @@ public:
     }
 };
 
+struct IfNode : AstNodeBase
+{
+    std::shared_ptr<ExprNode> condition;
+    std::shared_ptr<AstNodeBase> thenBody;
+    std::shared_ptr<AstNodeBase> elseBody; // nullptr if no else
+public:
+    IfNode(std::shared_ptr<ExprNode> condition,
+           std::shared_ptr<AstNodeBase> thenBody,
+           std::shared_ptr<AstNodeBase> elseBody)
+        : condition(condition), thenBody(thenBody), elseBody(elseBody)
+    {}
+
+    virtual bool Validate(INodeValidator& validator) const override;
+    virtual int GenerateCode(std::ostream& os) const override;
+};
+
 struct PrintFunctionNode : AstNodeBase
 {
     std::vector<std::shared_ptr<ExprNode>> expressions;

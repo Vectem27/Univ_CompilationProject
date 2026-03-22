@@ -62,6 +62,8 @@
 
 %token TRUE_LIT "true"
 %token FALSE_LIT "false"
+%token IF_KW "if"
+%token ELSE_KW "else"
 
 %token <std::string> PREDEF_FUNCTION
 
@@ -73,6 +75,8 @@
 %type <std::vector<std::shared_ptr<AstNodeBase>>> statementList
 %type <std::shared_ptr<AstNodeBase>> func
 
+%nonassoc NO_ELSE
+%nonassoc "else"
 %right EQUAL
 %left EQEQ NEQ
 %left LT LTE GT GTE
@@ -108,6 +112,14 @@ statement:
     | block
     {
         $$ = $1;
+    }
+    | "if" "(" expr ")" statement %prec NO_ELSE
+    {
+        $$ = std::make_shared<IfNode>($3, $5, nullptr);
+    }
+    | "if" "(" expr ")" statement "else" statement
+    {
+        $$ = std::make_shared<IfNode>($3, $5, $7);
     }
     ;
 

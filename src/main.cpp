@@ -145,6 +145,14 @@ int main(int argc, char* argv[])
         return yy::parser::make_FALSE_LIT();
     });
 
+    lexer.AddToken(TOK_IF, [](const std::string& text){
+        return yy::parser::make_IF_KW();
+    });
+
+    lexer.AddToken(TOK_ELSE, [](const std::string& text){
+        return yy::parser::make_ELSE_KW();
+    });
+
     lexer.AddToken(TOK_EOF, [](const std::string& text){
         return yy::parser::make_YYEOF();
     });

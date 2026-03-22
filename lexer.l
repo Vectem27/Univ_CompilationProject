@@ -19,6 +19,8 @@ STRING  \"([^\\\"\n]|\\.)*\"
 "print"     { return TOK_PREDEF_FUNCTION; }
 "true"      { return TOK_TRUE; }
 "false"     { return TOK_FALSE; }
+"if"        { return TOK_IF; }
+"else"      { return TOK_ELSE; }
 
 {ID}        { return TOK_IDENT; }
 {STRING}    { return TOK_STRING; }

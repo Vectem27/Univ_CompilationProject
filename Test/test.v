@@ -43,3 +43,13 @@ print(1 == 2);
     int testBlock;
     testBlock = 25;
 }
+
+if (50 == 3)
+    print("If fail");
+else
+{
+    print("Else success");
+    int test2;
+    test2 = 20;
+    print("Should be 20 : " test2);
+}
