@@ -60,3 +60,11 @@ while(ctr < 5)
     ctr = ctr + 1;
 
 print("Should be 5\n" ctr);
+
+do
+{
+    ctr = ctr + 1;
+}
+while(false);
+
+print("Should be 6\n" ctr);
