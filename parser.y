@@ -157,6 +157,8 @@ func:
     {
         if ($1 == "print")
             $$ = std::make_shared<PrintFunctionNode>($3);
+        else if ($1 == "read")
+            $$ = std::make_shared<ReadFunctionNode>($3);
     }
     ;
 

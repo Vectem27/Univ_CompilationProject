@@ -522,3 +522,15 @@ public:
         return 0;
     }
 };
+
+struct ReadFunctionNode : AstNodeBase
+{
+    std::vector<std::shared_ptr<ExprNode>> expressions;
+public:
+    ReadFunctionNode(std::vector<std::shared_ptr<ExprNode>> expressions)
+        : expressions(expressions)
+    {}
+
+    virtual bool Validate(INodeValidator& validator) const override;
+    virtual int GenerateCode(std::ostream& os) const override;
+};

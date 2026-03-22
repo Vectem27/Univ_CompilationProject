@@ -184,3 +184,31 @@ int IfNode::GenerateCode(std::ostream& os) const
     }
     return 0;
 }
+
+bool ReadFunctionNode::Validate(INodeValidator& validator) const
+{
+    for (const auto& expr : expressions)
+    {
+        if (!expr->Validate(validator))
+            return false;
+
+        if (dynamic_cast<VarAccessorNode*>(expr.get()) != nullptr)
+            continue;
+
+        validator.Send(ENodeValidationMessageType::Error, "read expects variables as arguments.");
+        return false;
+    }
+
+    return true;
+}
+
+int ReadFunctionNode::GenerateCode(std::ostream& os) const
+{
+    os << "std::cin";
+    for (const auto& expr : expressions)
+    {
+        os << " >> ";
+        expr->GenerateCode(os);
+    }
+    return 0;
+}
