@@ -8,7 +8,22 @@ bornSup = 100;
 if (bornInf < bornSup)
 {
     value = bornInf + (rand() % (bornSup - bornInf));
-    print("Valeur a trouver : "value);
+
+    int valTest;
+    do
+    {
+        print("Devine la valeur entre " bornInf " et " bornSup);
+        read(valTest);
+
+        if (valTest < value)
+            print("Valeur trop petite !");
+        else if (valTest > value)
+            print("Valeur trop grande !");
+    }while(valTest != value);
+
+    print("Bravo, tu as trouve !!!");
+    print("La valeur etait : " value);
+
 }
 else
-    print("Erreur : Borne sup inferieur ou égale à la borne inf");
+    print("Erreur : La borne sup est inferieur ou egale a la borne inf");
