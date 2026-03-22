@@ -5,6 +5,12 @@ bool ComparisonNode::Validate(INodeValidator& validator) const
     if (!leftExpr->Validate(validator) || !rightExpr->Validate(validator))
         return false;
 
+    if (leftExpr->GetType().IsVoid() || rightExpr->GetType().IsVoid())
+    {
+        validator.Send(ENodeValidationMessageType::Error, "Trying to compare void expressions.");
+        return false;
+    }
+
     if (op == ComparisonOperation::EQ || op == ComparisonOperation::NEQ)
     {
         if (leftExpr->GetType() == rightExpr->GetType())
@@ -49,6 +55,12 @@ bool BinaryOperatorNode::Validate(INodeValidator& validator) const
 { 
     if (!leftExpr->Validate(validator) || !rightExpr->Validate(validator))
         return false;
+
+    if (leftExpr->GetType().IsVoid() || rightExpr->GetType().IsVoid())
+    {
+        validator.Send(ENodeValidationMessageType::Error, "Trying to do operations with void expressions.");
+        return false;
+    }
 
     if (leftExpr->GetType().IsNumber() && rightExpr->GetType().IsNumber())
         return true;

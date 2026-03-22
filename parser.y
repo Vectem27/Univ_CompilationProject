@@ -75,7 +75,6 @@
 %type <std::shared_ptr<VarDeclaration>> varDecl
 %type <std::vector<std::shared_ptr<ExprNode>>> exprList
 %type <std::vector<std::shared_ptr<AstNodeBase>>> statementList
-%type <std::shared_ptr<AstNodeBase>> func
 
 %nonassoc NO_ELSE
 %nonassoc "else"
@@ -100,10 +99,6 @@ program:
 
 statement:
     varDecl ";"
-    {
-        $$ = $1;
-    }
-    | func ";"
     {
         $$ = $1;
     }
@@ -152,16 +147,6 @@ block:
     }
     ;
 
-func:
-    PREDEF_FUNCTION "(" exprList ")"
-    {
-        if ($1 == "print")
-            $$ = std::make_shared<PrintFunctionNode>($3);
-        else if ($1 == "read")
-            $$ = std::make_shared<ReadFunctionNode>($3);
-    }
-    ;
-
 exprList:
     expr
     {
@@ -206,6 +191,18 @@ expr:
     | IDENTIFIER
     {
         $$ = std::make_shared<VarAccessorNode>($1);
+    }
+    | PREDEF_FUNCTION "(" exprList ")"
+    {
+        if ($1 == "print")
+            $$ = std::make_shared<PrintFunctionNode>($3);
+        else if ($1 == "read")
+            $$ = std::make_shared<ReadFunctionNode>($3);
+    }
+    | PREDEF_FUNCTION "(" ")"
+    {
+        if ($1 == "rand")
+            $$ = std::make_shared<RandFunctionNode>();
     }
     | "(" expr ")"
     { 

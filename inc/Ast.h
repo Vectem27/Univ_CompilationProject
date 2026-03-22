@@ -40,6 +40,7 @@ public:
 
 enum class ExprTypeBase
 {
+    VOID,
     INT,
     FLOAT,
     STRING,
@@ -74,6 +75,11 @@ public:
     bool IsString() const
     {
         return typeBase == ExprTypeBase::STRING;
+    }
+
+    bool IsVoid() const
+    {
+        return typeBase == ExprTypeBase::VOID;
     }
 
     bool IsUserDefined() const
@@ -227,6 +233,18 @@ public:
     virtual int GenerateCode(std::ostream& os) const override { os << (value ? "true" : "false"); return 0; }
 };
 
+struct RandFunctionNode : public ExprNode
+{
+public:
+    virtual bool Validate(INodeValidator& validator) const override { return true; }
+    virtual ExprType GetType() const override { return ExprType(ExprTypeBase::INT); }
+    virtual int GenerateCode(std::ostream& os) const override
+    {
+        os << "([](){ static std::random_device rd; static std::mt19937 gen(rd()); static std::uniform_int_distribution<int> dist; return dist(gen); })()";
+        return 0;
+    }
+};
+
 enum class BinaryOperation
 {
     ADD,
@@ -326,6 +344,12 @@ public:
     {
         if (!target->Validate(validator) || !value->Validate(validator))
             return false;
+
+        if (target->GetType().IsVoid() || value->GetType().IsVoid())
+        {
+            validator.Send(ENodeValidationMessageType::Error, "Trying to assign a void expression.");
+            return false;
+        }
 
         if (target->GetType().IsNumber() && value->GetType().IsNumber())
             return true;
@@ -489,7 +513,7 @@ public:
     virtual int GenerateCode(std::ostream& os) const override;
 };
 
-struct PrintFunctionNode : AstNodeBase
+struct PrintFunctionNode : ExprNode
 {
     std::vector<std::shared_ptr<ExprNode>> expressions;
 public:
@@ -510,6 +534,11 @@ public:
         return true;
     }
 
+    virtual ExprType GetType() const override
+    {
+        return ExprType(ExprTypeBase::VOID);
+    }
+
     virtual int GenerateCode(std::ostream& os) const override
     {
         os << "std::cout";
@@ -523,7 +552,7 @@ public:
     }
 };
 
-struct ReadFunctionNode : AstNodeBase
+struct ReadFunctionNode : ExprNode
 {
     std::vector<std::shared_ptr<ExprNode>> expressions;
 public:
@@ -532,5 +561,9 @@ public:
     {}
 
     virtual bool Validate(INodeValidator& validator) const override;
+    virtual ExprType GetType() const override
+    {
+        return ExprType(ExprTypeBase::VOID);
+    }
     virtual int GenerateCode(std::ostream& os) const override;
 };

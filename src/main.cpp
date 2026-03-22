@@ -192,6 +192,7 @@ int main(int argc, char* argv[])
 
     outputFile << "#include <string>" << std::endl;
     outputFile << "#include <iostream>" << std::endl;
+    outputFile << "#include <random>" << std::endl;
     outputFile << std::endl;
     outputFile << "int main()" << std::endl << "{" << std::endl;
 

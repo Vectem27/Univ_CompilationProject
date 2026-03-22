@@ -18,6 +18,7 @@ STRING  \"([^\\\"\n]|\\.)*\"
 %%
 "print"     { return TOK_PREDEF_FUNCTION; }
 "read"      { return TOK_PREDEF_FUNCTION; }
+"rand"      { return TOK_PREDEF_FUNCTION; }
 "true"      { return TOK_TRUE; }
 "false"     { return TOK_FALSE; }
 "if"        { return TOK_IF; }
